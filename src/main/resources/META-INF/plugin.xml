@@ -1,0 +1,35 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>dev.gaphunter.mergeconflictleftovercompanion</id>
+    <name>Merge Conflict Leftover Companion</name>
+    <vendor>Gap Hunter Labs</vendor>
+    <description><![CDATA[
+        <p>Flags real Git merge-conflict markers
+        (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>,
+        <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>)
+        left behind in any file -- a real, distinct problem from an
+        *active* unresolved merge (which the IDE's own Commit window
+        already flags in red): a merge that was already resolved and
+        committed, but with the markers themselves accidentally left in
+        the file.</p>
+        <p><b>100% plain-text scan, any file type</b> -- no PSI-per-
+        language dependency, no network calls.</p>
+        <p>Stated honestly: any file whose text happens to match these
+        exact marker patterns is flagged, including documentation that
+        cites the literal marker syntax as an example -- a real,
+        accepted trade-off (favoring not missing a genuine leftover
+        marker over filtering out rare documentation false positives).</p>
+        <p>Free. No license nags, no telemetry.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <localInspection language=""
+            groupName="Merge Conflict Leftover Companion"
+            displayName="Leftover Git merge-conflict marker"
+            enabledByDefault="true"
+            level="WARNING"
+            implementationClass="dev.gaphunter.mergeconflictleftovercompanion.inspection.ConflictMarkerInspection"/>
+    </extensions>
+</idea-plugin>
