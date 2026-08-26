@@ -8,6 +8,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import dev.gaphunter.mergeconflictleftovercompanion.detect.ConflictMarkerScanner
+import dev.gaphunter.mergeconflictleftovercompanion.review.ReviewPrompt
 
 /**
  * Flags real Git merge-conflict markers left behind in any file's text.
@@ -29,19 +30,27 @@ class ConflictMarkerInspection : LocalInspectionTool() {
         val hits = ConflictMarkerScanner.scan(text)
         if (hits.isEmpty()) return null
 
+        val virtualFile = file.virtualFile
         val problems = hits.mapNotNull { hit ->
             val anchor = leafElementAt(file, hit.startOffset) ?: return@mapNotNull null
             val anchorStart = anchor.textRange.startOffset
             val relativeRange = TextRange(hit.startOffset - anchorStart, hit.endOffset - anchorStart)
             if (relativeRange.startOffset < 0 || relativeRange.endOffset > anchor.textLength) return@mapNotNull null
 
-            manager.createProblemDescriptor(
+            val problem = manager.createProblemDescriptor(
                 anchor,
                 relativeRange,
                 "Leftover Git merge-conflict marker: ${hit.label}",
                 ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
                 isOnTheFly,
             )
+
+            if (virtualFile != null) {
+                val lineNumber = file.viewProvider.document?.getLineNumber(hit.startOffset) ?: -1
+                ReviewPrompt.recordHit(file.project, "${virtualFile.path}:$lineNumber")
+            }
+
+            problem
         }
 
         return if (problems.isEmpty()) null else problems.toTypedArray()
