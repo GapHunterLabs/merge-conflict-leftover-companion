@@ -31,5 +31,6 @@
             enabledByDefault="true"
             level="WARNING"
             implementationClass="dev.gaphunter.mergeconflictleftovercompanion.inspection.ConflictMarkerInspection"/>
+        <notificationGroup id="Merge Conflict Leftover Companion" displayType="BALLOON"/>
     </extensions>
 </idea-plugin>
