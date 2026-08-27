@@ -56,7 +56,7 @@ class ConflictMarkerInspection : LocalInspectionTool() {
         return if (problems.isEmpty()) null else problems.toTypedArray()
     }
 
-    /** Leaf-anchored, never a composite node (`SDK_GOTCHAS.md` §20) -- same fallback-to-file-root pattern as `MissingEnvVarInspection.leafElementAt`. */
+    /** Leaf-anchored, never a composite node -- same fallback-to-file-root pattern as `MissingEnvVarInspection.leafElementAt`. */
     private fun leafElementAt(file: PsiFile, startOffset: Int): PsiElement? {
         if (startOffset < 0 || startOffset >= file.textLength) return null
         var element = file.findElementAt(startOffset) ?: return file
