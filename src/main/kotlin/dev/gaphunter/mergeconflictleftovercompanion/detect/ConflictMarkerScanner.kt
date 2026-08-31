@@ -24,12 +24,20 @@ data class ConflictMarkerHit(val startOffset: Int, val endOffset: Int, val label
 object ConflictMarkerScanner {
 
     private val START_MARKER = Regex("""^<{7}(?!<).*$""", RegexOption.MULTILINE)
+
+    // `|||||||` -- the common-ancestor ("base") section Git adds when
+    // merge.conflictStyle is "diff3" or "zdiff3" (the latter is the
+    // recommended default since Git 2.35), always the same 7-character
+    // marker shape as the other three, always missed by a scanner that
+    // only knows the 3-way conflict style.
+    private val BASE_MARKER = Regex("""^\|{7}(?!\|).*$""", RegexOption.MULTILINE)
     private val MIDDLE_MARKER = Regex("""^={7}$""", RegexOption.MULTILINE)
     private val END_MARKER = Regex("""^>{7}(?!>).*$""", RegexOption.MULTILINE)
 
     fun scan(text: String): List<ConflictMarkerHit> {
         val hits = mutableListOf<ConflictMarkerHit>()
         for (match in START_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "<<<<<<< (conflict start)")
+        for (match in BASE_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "||||||| (diff3 common-ancestor section)")
         for (match in MIDDLE_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "======= (conflict separator)")
         for (match in END_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, ">>>>>>> (conflict end)")
         return hits.sortedBy { it.startOffset }

@@ -26,6 +26,39 @@ class ConflictMarkerScannerTest {
     }
 
     @Test
+    fun `a diff3-style conflict block is found as 4 separate hits including the base marker`() {
+        val text = """
+            fun main() {
+            <<<<<<< HEAD
+                println("mine")
+            ||||||| merged common ancestors
+                println("original")
+            =======
+                println("theirs")
+            >>>>>>> feature-branch
+            }
+        """.trimIndent()
+
+        val hits = ConflictMarkerScanner.scan(text)
+        assertEquals(4, hits.size)
+        assertTrue(hits[0].label.startsWith("<<<<<<<"))
+        assertTrue(hits[1].label.startsWith("|||||||"))
+        assertTrue(hits[2].label.startsWith("======="))
+        assertTrue(hits[3].label.startsWith(">>>>>>>"))
+    }
+
+    @Test
+    fun `a base marker is only matched at exactly 7 pipes`() {
+        assertTrue(ConflictMarkerScanner.scan("|||||| not enough").isEmpty())
+        assertEquals(1, ConflictMarkerScanner.scan("||||||| merged common ancestors").size)
+    }
+
+    @Test
+    fun `8 or more pipes is not matched as the base marker`() {
+        assertTrue(ConflictMarkerScanner.scan("|||||||| too many").isEmpty())
+    }
+
+    @Test
     fun `clean code with no markers produces no hits`() {
         val text = "fun main() {\n    println(\"hello\")\n}"
         assertTrue(ConflictMarkerScanner.scan(text).isEmpty())
