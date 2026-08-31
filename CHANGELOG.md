@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Added
+
+- Detects the `|||||||` common-ancestor marker Git adds when
+  `merge.conflictStyle` is `diff3` or `zdiff3` (the latter has been
+  Git's recommended default since 2.35) -- previously only the 3-way
+  style's 3 markers were covered, silently missing this 4th one.
+
 ## [0.1.1]
 
 ### Added
@@ -23,6 +32,7 @@
 - 100% plain-text scan, any file type, no network calls, no
   telemetry. Free.
 
-[Unreleased]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/commits/0.1.0

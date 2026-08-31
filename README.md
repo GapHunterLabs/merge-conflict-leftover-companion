@@ -1,10 +1,13 @@
 # Merge Conflict Leftover Companion
 
-Flags real Git merge-conflict markers (`<<<<<<<`, `=======`,
-`>>>>>>>`) left behind in any file — a real, distinct problem from an
-*active* unresolved merge (which the IDE's own Commit window already
-flags in red): a merge that was already resolved and committed, but
-with the markers themselves accidentally left in the file.
+Flags real Git merge-conflict markers (`<<<<<<<`, `|||||||`,
+`=======`, `>>>>>>>`) left behind in any file — a real, distinct
+problem from an *active* unresolved merge (which the IDE's own Commit
+window already flags in red): a merge that was already resolved and
+committed, but with the markers themselves accidentally left in the
+file. Covers both the standard 3-way conflict style and the `diff3`/
+`zdiff3` style (the `|||||||` common-ancestor section, recommended as
+Git's default `merge.conflictStyle` since Git 2.35).
 
 ## Why it exists
 
