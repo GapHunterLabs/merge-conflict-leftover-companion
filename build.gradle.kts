@@ -19,6 +19,9 @@ dependencies {
         // this is the confirmed pattern for this dependency shape.
 
         testFramework(TestFrameworkType.Platform)
+        // Tests only: a real YAML lexer, whose block-scalar tokens split the
+        // "|||||||" and ">>>>>>>" lines (the plugin itself needs no YAML).
+        testBundledPlugin("org.jetbrains.plugins.yaml")
     }
 }
 

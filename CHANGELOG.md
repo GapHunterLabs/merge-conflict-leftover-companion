@@ -4,6 +4,21 @@
 
 ## [Unreleased]
 
+## [0.2.2]
+
+### Fixed
+
+- A title underlined with exactly seven `=` -- a Markdown (setext)
+  heading or a reStructuredText section such as "License" or
+  "Changes" -- was flagged as a conflict separator. `=======` and
+  `|||||||` are now only reported in a file that also has a `<<<<<<<`
+  or `>>>>>>>` line.
+- In YAML (and any language whose tokens split the marker line), the
+  `|||||||` and `>>>>>>>` markers were silently not reported, and others
+  were underlined only partly. Each warning now covers the whole marker
+  line.
+- In a Markdown file every marker was reported twice.
+
 ## [0.2.1]
 
 ### Fixed
@@ -39,7 +54,8 @@
 - 100% plain-text scan, any file type, no network calls, no
   telemetry. Free.
 
-[Unreleased]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.2.1...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.2.2...HEAD
+[0.2.2]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/GapHunterLabs/merge-conflict-leftover-companion/compare/0.1.0...0.1.1
