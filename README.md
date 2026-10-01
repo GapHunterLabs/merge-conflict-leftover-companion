@@ -9,6 +9,12 @@ file. Covers both the standard 3-way conflict style and the `diff3`/
 `zdiff3` style (the `|||||||` common-ancestor section, recommended as
 Git's default `merge.conflictStyle` since Git 2.35).
 
+![Merge Conflict Leftover Companion: catch merge-conflict markers left behind after a merge](docs/media/hero.gif)
+
+Each feature on its own:
+[Leftover markers](docs/media/01-leftover-markers.gif) ·
+[diff3, any file](docs/media/02-diff3-any-file.gif)
+
 ## Why it exists
 
 This is a real, recurring mistake — a quick web search for "detect git
