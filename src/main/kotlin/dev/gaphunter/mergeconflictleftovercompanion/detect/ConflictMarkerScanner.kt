@@ -37,9 +37,18 @@ object ConflictMarkerScanner {
     fun scan(text: String): List<ConflictMarkerHit> {
         val hits = mutableListOf<ConflictMarkerHit>()
         for (match in START_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "<<<<<<< (conflict start)")
-        for (match in BASE_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "||||||| (diff3 common-ancestor section)")
-        for (match in MIDDLE_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "======= (conflict separator)")
         for (match in END_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, ">>>>>>> (conflict end)")
+        // A line of exactly seven "=" is also how Markdown (setext) and
+        // reStructuredText underline a 7-letter title -- "License",
+        // "Changes", "Install" -- and every such README/CHANGES file was
+        // flagged (found 2026-09-30). The separator and the diff3 base
+        // marker are only reported in a file that also has a "<<<<<<<" or
+        // ">>>>>>>" line; a leftover conflict where both angle-bracket
+        // lines were deleted and only the separator kept is not caught.
+        if (hits.isNotEmpty()) {
+            for (match in BASE_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "||||||| (diff3 common-ancestor section)")
+            for (match in MIDDLE_MARKER.findAll(text)) hits += ConflictMarkerHit(match.range.first, match.range.last + 1, "======= (conflict separator)")
+        }
         return hits.sortedBy { it.startOffset }
     }
 }

@@ -50,12 +50,12 @@ class ConflictMarkerScannerTest {
     @Test
     fun `a base marker is only matched at exactly 7 pipes`() {
         assertTrue(ConflictMarkerScanner.scan("|||||| not enough").isEmpty())
-        assertEquals(1, ConflictMarkerScanner.scan("||||||| merged common ancestors").size)
+        assertEquals(2, ConflictMarkerScanner.scan("<<<<<<< HEAD\n||||||| merged common ancestors").size)
     }
 
     @Test
     fun `8 or more pipes is not matched as the base marker`() {
-        assertTrue(ConflictMarkerScanner.scan("|||||||| too many").isEmpty())
+        assertEquals(1, ConflictMarkerScanner.scan("<<<<<<< HEAD\n|||||||| too many").size)
     }
 
     @Test
@@ -77,8 +77,29 @@ class ConflictMarkerScannerTest {
 
     @Test
     fun `the middle separator requires exactly 7 equals signs alone on the line`() {
-        assertEquals(1, ConflictMarkerScanner.scan("=======").size)
-        assertTrue(ConflictMarkerScanner.scan("======= trailing text").isEmpty())
+        assertEquals(2, ConflictMarkerScanner.scan("<<<<<<< HEAD\n=======").size)
+        assertEquals(1, ConflictMarkerScanner.scan("<<<<<<< HEAD\n======= trailing text").size)
+    }
+
+    // Regression (2026-09-30): a 7-letter title underlined with exactly
+    // seven "=" -- Markdown setext and reStructuredText -- was flagged.
+    @Test
+    fun `a Markdown setext heading underline is not a conflict separator`() {
+        assertTrue(ConflictMarkerScanner.scan("pricing-service\n===============\n\nLicense\n=======\n\nApache-2.0.\n").isEmpty())
+    }
+
+    @Test
+    fun `a reStructuredText section underline is not a conflict separator`() {
+        assertTrue(ConflictMarkerScanner.scan("Changes\n=======\n\n2.4\n---\n\n- Longer checkout timeout.\n").isEmpty())
+    }
+
+    @Test
+    fun `separator and base markers are reported when an angle-bracket marker is in the file`() {
+        val text = "a\n|||||||\nb\n=======\nc\n>>>>>>> feature\n"
+        assertEquals(
+            listOf("||||||| (diff3 common-ancestor section)", "======= (conflict separator)", ">>>>>>> (conflict end)"),
+            ConflictMarkerScanner.scan(text).map { it.label },
+        )
     }
 
     @Test

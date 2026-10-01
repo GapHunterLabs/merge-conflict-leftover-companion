@@ -4,8 +4,8 @@ import com.intellij.codeInspection.InspectionManager
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemHighlightType
+import com.intellij.lang.Language
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import dev.gaphunter.mergeconflictleftovercompanion.detect.ConflictMarkerScanner
 import dev.gaphunter.mergeconflictleftovercompanion.review.ReviewPrompt
@@ -18,12 +18,11 @@ import dev.gaphunter.mergeconflictleftovercompanion.review.ReviewPrompt
  */
 class ConflictMarkerInspection : LocalInspectionTool() {
 
-    companion object {
-        /** Files larger than this are skipped -- avoids pathological cost on generated/minified files. */
-        const val MAX_FILE_LENGTH = 2_000_000
-    }
-
     override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<ProblemDescriptor>? {
+        // Registered for every language: a file with more than one PSI root
+        // (Markdown with the bundled plugin) ran this once per root and
+        // reported every marker twice. Only the base-language root reports.
+        if (!isBaseRoot(file.language, file.viewProvider.baseLanguage)) return null
         val text = file.text
         if (text.length > MAX_FILE_LENGTH) return null
 
@@ -32,14 +31,11 @@ class ConflictMarkerInspection : LocalInspectionTool() {
 
         val virtualFile = file.virtualFile
         val problems = hits.mapNotNull { hit ->
-            val anchor = leafElementAt(file, hit.startOffset) ?: return@mapNotNull null
-            val anchorStart = anchor.textRange.startOffset
-            val relativeRange = TextRange(hit.startOffset - anchorStart, hit.endOffset - anchorStart)
-            if (relativeRange.startOffset < 0 || relativeRange.endOffset > anchor.textLength) return@mapNotNull null
+            val range = markerRange(hit.startOffset, hit.endOffset, text.length) ?: return@mapNotNull null
 
             val problem = manager.createProblemDescriptor(
-                anchor,
-                relativeRange,
+                file,
+                range,
                 "Leftover Git merge-conflict marker: ${hit.label}",
                 ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
                 isOnTheFly,
@@ -56,11 +52,23 @@ class ConflictMarkerInspection : LocalInspectionTool() {
         return if (problems.isEmpty()) null else problems.toTypedArray()
     }
 
-    /** Leaf-anchored, never a composite node -- same fallback-to-file-root pattern as `MissingEnvVarInspection.leafElementAt`. */
-    private fun leafElementAt(file: PsiFile, startOffset: Int): PsiElement? {
-        if (startOffset < 0 || startOffset >= file.textLength) return null
-        var element = file.findElementAt(startOffset) ?: return file
-        while (element.firstChild != null) element = element.firstChild
-        return element
+    companion object {
+        /** Files larger than this are skipped -- avoids pathological cost on generated/minified files. */
+        const val MAX_FILE_LENGTH = 2_000_000
+
+        fun isBaseRoot(language: Language, baseLanguage: Language): Boolean = language == baseLanguage
+
+        /**
+         * The whole marker line, in file offsets, anchored to the file itself.
+         * It used to be anchored to the first leaf at the marker and dropped
+         * when the line was longer than that leaf: in YAML the "|||||||" and
+         * ">>>>>>>" lines start with a one-character block-scalar token, so
+         * those markers were silently not reported (found 2026-09-30). Null if
+         * the range falls outside the text.
+         */
+        fun markerRange(start: Int, end: Int, textLength: Int): TextRange? {
+            if (start < 0 || end <= start || end > textLength) return null
+            return TextRange(start, end)
+        }
     }
 }
