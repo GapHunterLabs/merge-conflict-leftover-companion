@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports a Git merge-conflict marker (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, the diff3
+<code>|||||||</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>) left in a file after the merge was
+resolved and committed.
+<!-- tooltip end -->
+<p>An active merge conflict is already highlighted by the IDE; this catches the markers that survived into a
+committed file. Any file type is scanned as plain text. A <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> or
+<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> line is always reported, including documentation that quotes the marker
+syntax.</p>
+</body>
+</html>
